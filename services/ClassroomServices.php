@@ -1,82 +1,101 @@
 <?php
-require_once("../../../../connection/config.php");
-require_once("../../../../connection/connection.php");
+require_once("../../../connection/config.php");
+require_once("../../../connection/connection.php");
 
-class TriviaServices extends config {
-    public function getAllTrivia() {
+class ClassroomServices extends config {
+    public function createClassroom($classroomId, $classroomTitle, $classroomDescription, $instructorId, $randomCode) {
         try {
-                $query = "SELECT * FROM `tbl_trivia` ";
-                $stmt = $this->pdo->prepare($query); // Prepare the query
-                $stmt->execute(); // Execute the query
-                return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch the result
-        }
-        catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-        }
-    }
-    public function create($trivia_id, $title, $body, $imagePaths) {
-        try {
-            $query = "INSERT INTO `tbl_trivia` (`trivia_id`, `title`, `body`, `image_path`) VALUES (:trivia_id, :title, :body, :image_path)";
+            $query = "INSERT INTO `tbl_classroom` (`classroom_id`, `classroom_title`, `classroom_description`, `instructor_id_fk`, `isActive`, `code`, `created_date`) 
+                      VALUES (:classroom_id, :classroom_title, :classroom_description, :instructor_id, 1, :code, NOW())";
+
             $stmt = $this->pdo->prepare($query);
-            $stmt->bindParam(':trivia_id', $trivia_id);
-            $stmt->bindParam(':title', $title);
-            $stmt->bindParam(':body', $body);
-            $stmt->bindParam(':image_path', $imagePaths);
-            $stmt->execute();
-            return true;
+            $stmt->bindParam(':classroom_id', $classroomId);
+            $stmt->bindParam(':classroom_title', $classroomTitle);
+            $stmt->bindParam(':classroom_description', $classroomDescription);
+            $stmt->bindParam(':instructor_id', $instructorId);
+            $stmt->bindParam(':code', $randomCode);
+
+            return $stmt->execute();
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
             return false;
         }
-    }    
-    public function getTriviaInfoId($id) {
-        try {
-                $query = "SELECT `id`, `trivia_id`, `title`, `body`, `image_path`, `created_date` FROM `tbl_trivia` WHERE id =  :id";
-                $stmt = $this->pdo->prepare($query); // Prepare the query
-                $stmt->bindParam(':id', $id); // Bind the value
-                $stmt->execute(); // Execute the query
-                return $stmt->fetch(PDO::FETCH_ASSOC); // Fetch the result
-        }
-        catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-        }
     }
-    public function update($id, $title, $body) {
+
+    public function updateClassroom($id, $classroomTitle, $classroomDescription, $classroomStatus) {
         try {
-            // Define the query with placeholders for updating an existing record
-            $query = "UPDATE `tbl_trivia` 
-                        SET `title` = :title,
-                            `body` = :body
-                        WHERE `id` = :id";
-     
-            // Prepare the query
-            $stmt = $this->pdo->prepare($query);
-            // Bind the values to the placeholders
-            $stmt->bindParam(':title', $title);
-            $stmt->bindParam(':body', $body);
-            $stmt->bindParam(':id', $id, PDO::PARAM_INT);  // Explicitly specify type for $id
-     
-            // Execute the query
-            $stmt->execute();
-            return true; // Returns true if at least one row was affected
-        } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-            return false; // Return false if the operation fails
-        }
-    }
-    public function delete($id) {
-        try {
-            $query = "DELETE FROM `tbl_trivia` WHERE `id` = :id";
+            $query = "UPDATE `tbl_classroom` SET `classroom_title`=:classroom_title,`classroom_description`=:classroom_description,`isActive`=:isActive WHERE `id`=:id";
+
             $stmt = $this->pdo->prepare($query);
             $stmt->bindParam(':id', $id);
-            $stmt->execute();
-            
-            // Check if the deletion was successful
-            return $stmt->rowCount() > 0; // Return true if at least one row was deleted
+            $stmt->bindParam(':classroom_title', $classroomTitle);
+            $stmt->bindParam(':classroom_description', $classroomDescription);
+            $stmt->bindParam(':isActive', $classroomStatus);
+
+            return $stmt->execute();
         } catch (PDOException $e) {
             echo "Error: " . $e->getMessage();
             return false;
         }
     }
+
+    public function showInstructorClassroom($instructor_id) {
+        try {
+            // Select query to get classrooms for a specific instructor
+            $query = "SELECT * FROM `tbl_classroom` WHERE `instructor_id_fk` = :instructor_id AND `isActive` = 1";
+            
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':instructor_id', $instructor_id); // Ensure proper type
+            $stmt->execute(); // Execute the query
+            
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all results as associative array
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage()); // Log error instead of echoing
+            return false;
+        }
+    }
+
+    public function showStudentInClassroom($instructor_id, $classroom_id) {
+        try {
+            // Select query to get classrooms for a specific instructor
+            $query = "SELECT 
+                            cs.id AS enrollment_id,
+                            cs.classroom_id_fk,
+                            cs.student_id_fk,
+                            cs.instructor_id_fk,
+                            cs.approved,
+                            s.student_id,
+                            s.student_fullname
+                        FROM tbl_classroom_student cs
+                        JOIN tbl_student s ON cs.student_id_fk = s.student_id
+                        WHERE cs.classroom_id_fk = :classroom_id AND  cs.instructor_id_fk = :instructor_id";
+            
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':instructor_id', $instructor_id); // Ensure proper type
+            $stmt->bindParam(':classroom_id', $classroom_id); // Ensure proper type
+            $stmt->execute(); // Execute the query
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all results as associative array
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage()); // Log error instead of echoing
+            return false;   
+        }
+    }
+    
+
+    public function updateStudentStatus($studentId, $status) {
+        try {
+            $query = "UPDATE tbl_classroom_student SET approved = :status WHERE id = :student_id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':status', $status, PDO::PARAM_INT);
+            $stmt->bindParam(':student_id', $studentId, PDO::PARAM_INT);
+    
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Error updating student status: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+
 }
 ?>

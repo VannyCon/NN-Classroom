@@ -1,7 +1,7 @@
 <?php 
+
 require_once("../../../connection/config.php");
 require_once("../../../connection/connection.php");
-
 
 class LoginAccess extends config {
     public function adminlogin($username, $password){
@@ -41,9 +41,9 @@ class LoginAccess extends config {
             // Check if user exists and verify password
             if ($user && password_verify($password, $user['instructor_password'])) {
                 // Start a session and store user data
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['username'] = $user['instructor_username'];
-    
+                $_SESSION['instructor_id'] = $user['instructor_id'];
+                $_SESSION['instructor_username'] = $user['instructor_username'];
+                $_SESSION['instructor_fullname'] = $user['instructor_fullname'];
                 return [
                     'success' => true,
                     'status' => $user['isApproved'] ?? null // Assuming 'isApproved' is the status column
@@ -73,8 +73,9 @@ class LoginAccess extends config {
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($user && password_verify($password, $user['student_password'])) {
                 // Password is correct, start a session
-                $_SESSION['user_id'] =  $user['id'];
-                $_SESSION['username'] = $user['student_username'];
+                $_SESSION['student_id'] =  $user['student_id'];
+                $_SESSION['student_username'] = $user['student_username'];
+                $_SESSION['student_fullname'] = $user['student_fullname'];
                 // Redirect to a protected page
                 return true;
                 exit();

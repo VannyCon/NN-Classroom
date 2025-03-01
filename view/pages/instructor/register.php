@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instructor Registration - Sugarcane System</title>
+    <title>Registration</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
@@ -57,7 +57,7 @@
                                 <button class="btn btn-dark btn-lg btn-block w-100" type="submit">Register</button>
 
                                 <div class="text-center mt-4">
-                                    <p>Already have an account? <a href="login.php">Login</a></p>
+                                    <p>Already have an account? <a href="index.php">Login</a></p>
                                 </div>
                             </form>
                             <!-- End Registration Form -->

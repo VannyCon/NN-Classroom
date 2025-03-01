@@ -1,6 +1,6 @@
 <?php
 require_once('../../../services/StudentServices.php');
-$student = new StudentServices();
+$studentService = new StudentServices();
 
 // REGISTER STUDENT
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'registerStudent') {
@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     // Debug: Print processed data
     error_log("Processed registration data - Student ID: $student_id, Username: $username, Fullname: $fullname");
 
-    $status = $student->registerStudent($student_id, $username, $password, $fullname);
+    $status = $studentService->registerStudent($student_id, $username, $password, $fullname);
     
     if ($status) {
         header("Location: index.php?success=1");
@@ -31,4 +31,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         exit();
     }
 }
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'enrollClassroom') {
+    if (empty($_POST['code'])) {
+        header("Location: dashboard.php?error=Please input a Classroom Code.");
+        exit();
+    }
+
+    $studentId = $_SESSION['student_id'] ?? null;
+    if (!$studentId) {
+        header("Location: student.php?error=Student not logged in.");
+        exit();
+    }
+
+    $code = StudentServices::clean('code', 'post');
+    $status = $studentService->enrollClassroom($studentId, $code);
+
+    if ($status['success']) {
+        header("Location: dashboard.php?success=1");
+        exit();
+    } else {
+        header("Location: dashboard.php?error=" . urlencode($status['message']));
+        exit();
+    }
+}
+
 ?>

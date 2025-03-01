@@ -1,5 +1,6 @@
 <?php 
 ob_start();
+session_start();
 class config {
     public $pdo; // Declare $pdo as a class property
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 18, 2025 at 01:57 PM
+-- Generation Time: Feb 22, 2025 at 02:54 AM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 7.4.29
 
@@ -77,13 +77,6 @@ CREATE TABLE `tbl_classroom_student` (
   `instructor_id_fk` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `tbl_classroom_student`
---
-
-INSERT INTO `tbl_classroom_student` (`id`, `classroom_id_fk`, `student_id_fk`, `instructor_id_fk`) VALUES
-(1, 'CLASSROOM-001', 'STUDENT-2012341', 'INSTRUCTOR-001');
-
 -- --------------------------------------------------------
 
 --
@@ -95,15 +88,21 @@ CREATE TABLE `tbl_instructor` (
   `instructor_id` varchar(255) NOT NULL,
   `instructor_username` varchar(255) NOT NULL,
   `instructor_password` varchar(255) NOT NULL,
-  `instructor_fullname` varchar(255) NOT NULL
+  `instructor_fullname` varchar(255) NOT NULL,
+  `isApproved` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `tbl_instructor`
 --
 
-INSERT INTO `tbl_instructor` (`id`, `instructor_id`, `instructor_username`, `instructor_password`, `instructor_fullname`) VALUES
-(1, 'INSTRUCTOR-001', 'instructor', 'instructor', 'John Doep');
+INSERT INTO `tbl_instructor` (`id`, `instructor_id`, `instructor_username`, `instructor_password`, `instructor_fullname`, `isApproved`) VALUES
+(1, 'INSTRUCTOR-001', 'instructor', 'instructor', 'John Doep', 1),
+(2, 'INSTRUCTOR-3595029', 'asdsa', '$2y$10$EZP7olMTxKucDoNikpI11OOCn1pvJNt6meVLa8WIXNkU1rwtxbDK2', 'asd', 2),
+(3, 'INSTRUCTOR-6442393', 'test', '$2y$10$nf8ASRk0KR1c/sL8KAG/tu7h.mNx1xshaTVfMbKnx5g97B0t73jmS', 'test', 0),
+(4, 'INSTRUCTOR-5817880', 'test1', '$2y$10$TdqJ0Z9Rin0r3S4QoozqSetq/PXk1RNjGNs4pLYlW4qXWqstKR1iK', 'test1', 1),
+(5, 'INSTRUCTOR-1872681', 's', '$2y$10$wEpq25geKhu2GeVSdfK8.OjKW6ADFqpzlm6nWly9Oy7TW6gZVV5bG', 's', 2),
+(6, 'INSTRUCTOR-4665909', 'asdf', '$2y$10$OS9LRb2oIx3N2Pv3gtDLb.iC4qt23xt2jtiIVTkcF4rJtSQbx1gtq', 'asdf', 0);
 
 -- --------------------------------------------------------
 
@@ -193,7 +192,6 @@ CREATE TABLE `tbl_student` (
   `student_username` varchar(255) NOT NULL,
   `student_password` varchar(255) NOT NULL,
   `student_fullname` varchar(255) NOT NULL,
-  `approved_by` varchar(255) NOT NULL,
   `created_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -201,8 +199,9 @@ CREATE TABLE `tbl_student` (
 -- Dumping data for table `tbl_student`
 --
 
-INSERT INTO `tbl_student` (`id`, `student_id`, `student_username`, `student_password`, `student_fullname`, `approved_by`, `created_date`) VALUES
-(1, 'STUDENT-2012341', 'student', 'student', 'Smith Winson', 'ADMIN-001', '2025-02-18 11:51:29');
+INSERT INTO `tbl_student` (`id`, `student_id`, `student_username`, `student_password`, `student_fullname`, `created_date`) VALUES
+(2, 'STUDENT-3861072', 'asd', '$2y$10$5.VdYb3FMrbQ6635qlQPE.XSaxV.VPeD7XqC5vo85IzEl37WBQ47O', 'asd', '2025-02-21 01:07:14'),
+(3, 'STUDENT-3525082', 'test', '$2y$10$XGtQrig9ddQepGCPWEQDoObCxcrCef9w9shzuxT3ZzXjVj8ff9cli', 'test', '2025-02-21 01:08:27');
 
 --
 -- Indexes for dumped tables
@@ -278,8 +277,7 @@ ALTER TABLE `tbl_score`
 --
 ALTER TABLE `tbl_student`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `student_id` (`student_id`),
-  ADD KEY `approved_by` (`approved_by`);
+  ADD UNIQUE KEY `student_id` (`student_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -307,7 +305,7 @@ ALTER TABLE `tbl_classroom_student`
 -- AUTO_INCREMENT for table `tbl_instructor`
 --
 ALTER TABLE `tbl_instructor`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `tbl_questions`
@@ -331,7 +329,7 @@ ALTER TABLE `tbl_score`
 -- AUTO_INCREMENT for table `tbl_student`
 --
 ALTER TABLE `tbl_student`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
@@ -357,12 +355,6 @@ ALTER TABLE `tbl_classroom_student`
 ALTER TABLE `tbl_questions`
   ADD CONSTRAINT `clasroom` FOREIGN KEY (`classroom_id_fk`) REFERENCES `tbl_classroom` (`classroom_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `quiz` FOREIGN KEY (`quiz_id_fk`) REFERENCES `tbl_quiz` (`quiz_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `tbl_student`
---
-ALTER TABLE `tbl_student`
-  ADD CONSTRAINT `admin` FOREIGN KEY (`approved_by`) REFERENCES `tbl_admin` (`admin_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
