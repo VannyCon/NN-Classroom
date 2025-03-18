@@ -7,7 +7,7 @@
         header("Location: classroom.php?error=Instructor not logged in or Classroom doesn't exist.");
         exit();
     }
-    $quizzes = $quizService->getQuizzes($classroomId);
+    $quizzes = $quizService->getInsQuizzes($classroomId);
 ?>
 
 <!-- View -->
@@ -55,6 +55,10 @@
         .expired .quiz-title {
             text-decoration: line-through;
         }
+        .expire {
+            background-color:rgb(242, 175, 175);
+            color:rgb(53, 53, 53);
+        }
     </style>
 </head>
 <body>
@@ -64,54 +68,96 @@
             Manage Student
         </a>
         <h2 class="mb-4">Available Quizzes</h2>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createQuizModal">Create Quiz</button>
-
+        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#createQuizModal">Create Quiz</button>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#insertCopiedQuizModal">Insert Copied Quiz</button>
         <div class="row">
             <?php if ($quizzes): ?>
                 <?php foreach ($quizzes as $quiz): ?>
                     <?php 
-                        // Format Dates
                         $createdDate = date("F j, Y h:i A", strtotime($quiz['created_date']));
                         $expirationDate = $quiz['expiration'] ? date("F j, Y h:i A", strtotime($quiz['expiration'])) : 'No Expiration';
-
-                        // Get Remaining Time (in seconds)
                         $expirationTimestamp = strtotime($quiz['expiration']);
                         $currentTimestamp = time();
                         $isExpired = $expirationTimestamp && $expirationTimestamp < $currentTimestamp;
+
+                        // Check if quiz has questions
+                        $hasQuestions = $quiz['has_questions'] == 1;
                     ?>
                     <div class="col-md-4 mb-4">
-                        <div class="card quiz-card <?= $isExpired ? 'border-danger expired' : 'border-success' ?>" 
-                            data-expiration="<?= $expirationTimestamp ?>">
-                            <div class="card-body">
-                                <h5 class="card-title"> <?= htmlspecialchars($quiz['quiz_title']) ?> </h5>
-                                <p class="card-text"> <?= htmlspecialchars($quiz['quiz_description']) ?> </p>
-                                <div class="quiz-meta mt-2 text-muted">
-                                    <i class="fa fa-calendar"></i> Created: <?= $createdDate ?> <br>
-                                    <i class="fa fa-clock"></i> Expires: <?= $expirationDate ?>
-                                </div>
+                        <a href="<?= (!$isExpired && !$hasQuestions) ? "create_quiz.php?quiz_id={$quiz['quiz_id']}&classroom_id={$classroomId}&instructor_id={$instructorId}" : '#' ?>" 
+   class="text-decoration-none <?= ($isExpired || !$hasQuestions) ? 'disabled-link' : '' ?>">
 
-                                <!-- Countdown Timer -->
-                                <div class="countdown mt-2 text-primary"></div>
 
-                                <div class="mt-3">
-                                    <button class="btn btn-warning btn-sm" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#editQuizModal"
-                                        onclick="editQuiz('<?= $quiz['quiz_id'] ?>', '<?= htmlspecialchars($quiz['quiz_title']) ?>', '<?= htmlspecialchars($quiz['quiz_description']) ?>', '<?= $quiz['expiration'] ?>')">
-                                        <i class="fa fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-danger btn-sm" onclick="confirmDelete('<?= $quiz['quiz_id'] ?>')">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </button>
-                                </div>
+                            <div class="card quiz-card <?= $isExpired ? 'border-danger expire text-white' : 'border-success' ?>" 
+                                data-expiration="<?= $expirationTimestamp ?>">
+                                <div class="card-body p-0">
+                                    <div class="d-flex flex-row-reverse">
+                                        <?php if ($hasQuestions){?>
+                                        <button class="btn btn-success" onclick="copyToClipboard(event, '<?php echo $quiz['quiz_id']; ?>')" title="Share">
+                                            <i class="fas fa-share-alt text-white"></i>
+                                        </button>
+                                        <?php }?>
+                                    </div>
+                                    <h5 class="card-title"> <?= htmlspecialchars($quiz['quiz_title']) ?> </h5>
+                                    <p class="card-text"> <?= htmlspecialchars($quiz['quiz_description']) ?> </p>
+                                    <div class="quiz-meta mt-2 text-muted">
+                                        <i class="fa fa-calendar"></i> Created: <?= $createdDate ?> <br>
+                                        <i class="fa fa-clock"></i> Expires: <?= $expirationDate ?>
+                                    </div>
+                                        <!-- Indicate if questions are already created -->
+                                        <?php if ($hasQuestions): ?>
+                                            <p class="text-success mb-0"><i class="fa fa-check-circle"></i> Questions Already Created</p>
+                                        <?php else: ?>
+                                            <p class="text-danger mb-0"><i class="fa fa-exclamation-circle"></i> No Questions Yet</p>
+                                        <?php endif; ?>
+                                            <!-- Countdown Timer -->
+                                            <div class="countdown m-0 text-primary"></div>
+                                    </div>
+                                    </a>
+                                    <div class="d-flex justify-content-end m-0">
+                                        <!-- Edit Button -->
+                                        <button class="btn btn-warning btn-sm mx-2" 
+                                            onclick="editQuiz('<?= $quiz['quiz_id'] ?>', '<?= htmlspecialchars($quiz['quiz_title']) ?>', '<?= htmlspecialchars($quiz['quiz_description']) ?>', '<?= $quiz['expiration'] ?>')"
+                                            data-bs-toggle="modal" data-bs-target="#editQuizModal">
+                                            <i class="fa fa-edit"></i> Edit
+                                        </button>
+
+                                        <!-- Delete Button -->
+                                        <button class="btn btn-danger btn-sm" onclick="confirmDelete('<?= $quiz['quiz_id'] ?>')" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                                            <i class="fa fa-trash"></i> Delete
+                                        </button>
+                                    </div>
                             </div>
-                        </div>
-                    </div>
 
+                    </div>
                 <?php endforeach; ?>
+
             <?php else: ?>
                 <p>No quizzes available.</p>
             <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Insert Existing Quiz -->
+    <div class="modal fade" id="insertCopiedQuizModal" tabindex="-1" aria-labelledby="insertCopiedQuizModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="insertCopiedQuizModalLabel">Insert Copied Quiz</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="">
+                        <input type="hidden" name="action" value="insertCopiedQuiz">
+                        <div class="mb-3">
+                            <label class="form-label">Code</label>
+                            <input type="text" class="form-control" name="code" required>
+                            <input type="hidden" name="classroom_id" value="<?php echo $_GET['classroom_id']?>">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -220,6 +266,16 @@
 
 
     <script>
+         // Copy classroom code to clipboard
+        function copyToClipboard(event, code) {
+            event.stopPropagation(); // Prevents the click from affecting the parent link
+            navigator.clipboard.writeText(code).then(() => {
+                alert('Classroom code copied: ' + code);
+            }).catch(err => {
+                console.error('Error copying text: ', err);
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function () {
             function updateCountdowns() {
                 const now = new Date().getTime();

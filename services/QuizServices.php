@@ -3,9 +3,45 @@ require_once("../../../connection/config.php");
 require_once("../../../connection/connection.php");
 
 class QuizServices extends config {
-    public function getQuizzes($classroomId) {
+    public function getQuizzes($classroomId, $studentId) {
         try {
-            $query = "SELECT * FROM `tbl_quiz` WHERE `classroom_id_fk` = :classroomId";
+            $query = "
+                SELECT q.*,
+                       s.*, 
+                       CASE 
+                           WHEN s.student_id_fk IS NOT NULL THEN 1 
+                           ELSE 0 
+                       END AS taken 
+                FROM tbl_quiz q
+                LEFT JOIN tbl_score s 
+                    ON q.quiz_id = s.quiz_id_fk 
+                    AND s.student_id_fk = :studentId
+                WHERE q.classroom_id_fk = :classroomId
+            ";
+            
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':classroomId', $classroomId);
+            $stmt->bindParam(':studentId', $studentId);
+            $stmt->execute();
+    
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getInsQuizzes($classroomId) {
+        try {
+            $query = "SELECT q.*, 
+                             CASE 
+                                 WHEN EXISTS (SELECT 1 FROM tbl_questions tq WHERE tq.quiz_id_fk = q.quiz_id) 
+                                 THEN 1 
+                                 ELSE 0 
+                             END AS has_questions 
+                      FROM tbl_quiz q 
+                      WHERE q.classroom_id_fk = :classroomId";
+                      
             $stmt = $this->pdo->prepare($query);
             $stmt->bindParam(':classroomId', $classroomId);
             $stmt->execute();
@@ -15,6 +51,8 @@ class QuizServices extends config {
             return false;
         }
     }
+    
+    
 
     public function createQuiz($quizId, $quizTitle, $quizDescription, $instructorId, $classroomId, $expiration) {
         try {
@@ -60,6 +98,82 @@ class QuizServices extends config {
             return false;
         }
     }
+
+
+    
+    // Function to copy quiz and its questions
+    public function copyQuiz($quizId, $newClassroomId) {
+        global $pdo;
+
+        // Step 1: Fetch the original quiz
+        $stmt = $this->pdo->prepare("SELECT * FROM tbl_quiz WHERE quiz_id = :quizId");
+        $stmt->execute(['quizId' => $quizId]);
+        $quiz = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$quiz) {
+            return "Quiz not found.";
+        }
+
+        // Step 2: Check if the quiz already exists in the new classroom
+        $stmt = $this->pdo->prepare("SELECT * FROM tbl_quiz WHERE quiz_id = :quiz_id AND classroom_id_fk = :newClassroomId");
+        $stmt->execute(['quiz_id' => $quiz['quiz_id'], 'newClassroomId' => $newClassroomId]);
+        $existingQuiz = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($existingQuiz) {
+            return "A quiz with the same ID already exists in the target classroom.";
+        }
+
+        // Step 3: Insert the quiz into the new classroom
+        $newQuizInsertID = 'QUIZ-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $stmt = $this->pdo->prepare("INSERT INTO tbl_quiz (quiz_id, quiz_title, quiz_description, instructor_id_fk, classroom_id_fk, isActive, expiration, created_date) 
+                                VALUES (:quiz_id, :quiz_title, :quiz_description, :instructor_id_fk, :newClassroomId, :isActive, :expiration, NOW())");
+        if (!$stmt->execute([
+            'quiz_id' => $newQuizInsertID,
+            'quiz_title' => $quiz['quiz_title'],
+            'quiz_description' => $quiz['quiz_description'],
+            'instructor_id_fk' => $quiz['instructor_id_fk'],
+            'newClassroomId' => $newClassroomId,
+            'isActive' => $quiz['isActive'],
+            'expiration' => $quiz['expiration']
+        ])) {
+            return "Failed to insert the quiz into the new classroom.";
+        }
+
+        // Step 4: Fetch the questions associated with the original quiz
+        $stmt = $this->pdo->prepare("SELECT * FROM tbl_questions WHERE quiz_id_fk = :quizId");
+        $stmt->execute(['quizId' => $quizId]);
+        $questions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Step 5: Insert each question into the new quiz
+        foreach ($questions as $question) {
+            $newQuestionId = $newQuizInsertID . "_" . $question['number']; // Create a new unique question ID
+            $stmt = $this->pdo->prepare("INSERT INTO tbl_questions (quiz_id_fk, question_id, number, classroom_id_fk, question_type, question_description, question_imagepath, answer, a, b, c, d) 
+                                    VALUES (:newQuizId, :question_id, :number, :newClassroomId, :question_type, :question_description, :question_imagepath, :answer, :a, :b, :c, :d)");
+            if (!$stmt->execute([
+                'newQuizId' => $newQuizInsertID,
+                'question_id' =>  $newQuestionId,
+                'number' => $question['number'],
+                'newClassroomId' => $newClassroomId,
+                'question_type' => $question['question_type'],
+                'question_description' => $question['question_description'],
+                'question_imagepath' => $question['question_imagepath'],
+                'answer' => $question['answer'],
+                'a' => $question['a'],
+                'b' => $question['b'],
+                'c' => $question['c'],
+                'd' => $question['d']
+            ])) {
+                return "Failed to insert question: " . $question['question_description'];
+            }
+        }
+
+        return true; // Return true if everything was successful
+    }
+
+    // // Example usage
+    // $originalQuizId = 1; // ID of the quiz you want to copy
+    // $newClassroomId = 2; // ID of the classroom where you want to copy the quiz
+    // copyQuiz($originalQuizId, $newClassroomId);
     
 }
 ?>

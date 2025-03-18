@@ -28,6 +28,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         header("Location: classroom.php?classroom_id=".$_GET['classroom_id']."&success=" . ($status ? "Quiz updated successfully." : "Failed to update quiz."));
         exit();
     }
+
+    if ($action == 'insertCopiedQuiz') {
+        $code = $_POST['code'];
+        $classroom_id = $_POST['classroom_id'];
+        $status = $quizService->copyQuiz($code, $classroom_id);
+        
+        // Check if status is true or an error message
+        if ($status === true) {
+            header("Location: classroom.php?classroom_id=".$_GET['classroom_id']."&success=Quiz created successfully.");
+        } else {
+            header("Location: classroom.php?classroom_id=".$_GET['classroom_id']."&error=" . urlencode($status));
+        }
+        exit();
+    }
+
+    
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'deleteQuiz') {

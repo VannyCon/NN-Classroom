@@ -2,12 +2,17 @@
     include_once('../../../controller/QuizController.php');
     $successMessage = $_GET['success'] ?? '';
     $classroomId = $_GET['classroom_id'] ?? null; 
+    $studentID = $_GET['student_id'] ?? null; 
+    
     if (!$classroomId) {
         header("Location: classroom.php?error=Instructor not logged in or Classroom doesn't exist.");
         exit();
     }
-    $studentID = $_SESSION['student_id'];
-    $quizzes = $quizService->getQuizzes($classroomId, $studentID);
+    if($studentID != $_SESSION['student_id']){
+        header("Location: ../../../404.php");
+        exit();
+    }
+    $quizzes = $quizService->getQuizzes($classroomId);
 ?>
 
 <!-- View -->
@@ -46,9 +51,10 @@
             color: gray;
         }
         .expired {
-            background-color:rgb(255, 171, 171);
-            color:rgb(77, 77, 77);
+            background-color: #e0e0e0;
+            color: #9e9e9e;
             pointer-events: none;
+            filter: grayscale(100%);
             border: 2px solid #9e9e9e;
         }
         .expired .quiz-title {
@@ -58,60 +64,10 @@
 </head>
 <body>
     <div class="container mt-5">
-        <a href="dashboard.php" class="btn btn-danger mb-3">Back</a>
-        <h2 class="mb-4">Available Quizzes</h2>
+        <a href="classroom.php?classroom_id=<?php echo $classroomId?>" class="btn btn-danger mb-3">Back</a>
+        <h2 class="mb-4">Take Quizzes</h2>
 
-        <div class="row">
-            <?php if ($quizzes): ?>
-                <?php foreach ($quizzes as $quiz): ?>
-                    <?php 
-                        $isTaken = $quiz['taken'] == 1;
-                        $createdDate = date("F j, Y h:i A", strtotime($quiz['created_date']));
-                        $expirationDate = $quiz['expiration'] ? date("F j, Y h:i A", strtotime($quiz['expiration'])) : 'No Expiration';
-                        $expirationTimestamp = strtotime($quiz['expiration']);
-                        $currentTimestamp = time();
-                        $isExpired = $expirationTimestamp && $expirationTimestamp < $currentTimestamp;
-                    ?>
-
-                    <div class="col-md-4 mb-4">
-                        <div class="card quiz-card <?= $isTaken ? 'border-info bg-light' : ($isExpired ? 'border-danger expired' : 'border-success') ?>" 
-                            data-expiration="<?= $expirationTimestamp ?>">
-
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <?= htmlspecialchars($quiz['quiz_title']) ?> 
-                                    <?php if ($isTaken): ?>
-                                        <i class="fa fa-check-circle text-info"></i>
-                                    <?php endif; ?>
-                                </h5>
-                                <p class="card-text"><?= htmlspecialchars($quiz['quiz_description']) ?></p>
-                                <div class="quiz-meta mt-2 text-muted">
-                                    <i class="fa fa-calendar"></i> Created: <?= $createdDate ?><br>
-                                    <i class="fa fa-clock"></i> Expires: <?= $expirationDate ?>
-                                </div>
-                                
-                                
-                                <?php if (!$isTaken && !$isExpired): ?>
-                                    <div class="countdown m-0 text-primary"></div>
-                                    <a href="take_quiz.php?quiz_id=<?= $quiz['quiz_id'] ?>&classroom_id=<?= $classroomId ?>&student_id=<?= $_SESSION['student_id'] ?>"
-                                        class="btn btn-primary mt-3">Take Quiz</a>
-                                <?php else: ?>
-                                    <p class="text-muted mt-1 my-0">
-                                        <?php if ($isTaken && isset($quiz['score'], $quiz['total'])): ?>
-                                            <span class='text-primary'>Score: </span><?= htmlspecialchars("".$quiz['score']) . "/" . htmlspecialchars($quiz['total']) ?>
-                                        <?php endif; ?>
-                                    </p>
-                                    <p class="my-0 <?= $isTaken ? "text-success" : "text-danger" ?>"><?= $isTaken ? "Already Taken" : "Expired" ?></p>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-
-            <?php else: ?>
-                <p>No quizzes available.</p>
-            <?php endif; ?>
-        </div>
+        
     </div>
 
     <!-- Create Quiz Modal -->
