@@ -1,6 +1,6 @@
 <?php 
 ob_start();
-session_start();
+
   // Set expiration date and time (YYYY-MM-DD HH:MM:SS format)
   $expireDateTime = strtotime("2025-04-13 08:20:00"); // Change to your desired date & time
   $currentDateTime = time();
@@ -24,6 +24,7 @@ class config {
     }
 
     public function __construct(){
+        
         require_once('config.php'); // Include config.php for DB constants
         $dsn = "mysql:host=".H.";dbname=".DB; // Corrected concatenation
         $username = U;
@@ -54,7 +55,6 @@ class config {
     }
     
     function logout(){
-        session_start();
         // Unset all session variables
         $_SESSION = array();
         // Destroy the session

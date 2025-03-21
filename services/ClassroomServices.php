@@ -97,5 +97,90 @@ class ClassroomServices extends config {
     }
     
 
+    public function createReview($reviwerID, $reviewerTitle, $reviewerDescription, $docsPath, $instructorId, $classroomId) {
+        try {
+            $query = "INSERT INTO `tbl_reviewer` (`reviewer_id`, `reviewer_title`, `reviewer_description`, `docs_path`, `instructor_id_fk`, `classroom_id_fk`, `isActive`, `created_date`) 
+                      VALUES (:reviewer_id, :reviewer_title, :reviewer_description, :docs_path, :instructor_id, :classroom_id, 1, NOW())";
+    
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':reviewer_id', $reviwerID);
+            $stmt->bindParam(':reviewer_title', $reviewerTitle);
+            $stmt->bindParam(':reviewer_description', $reviewerDescription);
+            $stmt->bindParam(':docs_path', $docsPath);
+            $stmt->bindParam(':instructor_id', $instructorId);
+            $stmt->bindParam(':classroom_id', $classroomId);
+    
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
+
+    public function updateReview($reviewerID, $reviewerTitle, $reviewerDescription, $docsPath) {
+        try {
+            // If no new document is uploaded, only update title and description
+            if ($docsPath === null) {
+                $query = "UPDATE `tbl_reviewer` SET `reviewer_title`= :reviewer_title, `reviewer_description`= :reviewer_description WHERE reviewer_id = :reviewer_id";
+                
+                $stmt = $this->pdo->prepare($query);
+                $stmt->bindParam(':reviewer_id', $reviewerID); // Fixed typo here
+                $stmt->bindParam(':reviewer_title', $reviewerTitle);
+                $stmt->bindParam(':reviewer_description', $reviewerDescription);
+            } else {
+                // If a new document is uploaded, update all fields
+                $query = "UPDATE `tbl_reviewer` SET `reviewer_title`= :reviewer_title, `reviewer_description`= :reviewer_description, `docs_path`= :docs_path WHERE reviewer_id = :reviewer_id";
+                
+                $stmt = $this->pdo->prepare($query);
+                $stmt->bindParam(':reviewer_id', $reviewerID); // Fixed typo here
+                $stmt->bindParam(':reviewer_title', $reviewerTitle);
+                $stmt->bindParam(':reviewer_description', $reviewerDescription);
+                $stmt->bindParam(':docs_path', $docsPath);
+            }
+    
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            echo "Error: " . $e->getMessage();
+            return false;
+        }
+    }
+
+
+    public function getAllReviews() {
+        try {
+            $query = "SELECT * FROM `tbl_reviewer` WHERE `isActive` = 1 ORDER BY `created_date` DESC";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getAllReviewsByClassroomID($classroom_id) {
+        try {
+            $query = "SELECT * FROM `tbl_reviewer` WHERE `isActive` = 1 AND `classroom_id_fk` = :classroom_id ORDER BY `created_date` DESC";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':classroom_id', $classroom_id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function deleteReview($id) {
+        try {
+            $query = "DELETE FROM `tbl_reviewer` WHERE `id` = :id";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return false;
+        }
+    }
 }
 ?>

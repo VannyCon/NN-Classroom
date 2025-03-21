@@ -76,6 +76,7 @@
 <body>
 
     <div class="container mt-5">
+        <a href="classroom.php?classroom_id=<?php echo $classroomId?>" class="btn btn-danger mb-3">Back</a>
         <h2>Classroom Students</h2>
 
         <div class="student-list mt-3">

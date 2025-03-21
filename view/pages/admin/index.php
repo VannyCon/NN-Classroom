@@ -17,6 +17,21 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+<script>
+    function togglePassword(id, iconId) {
+      var passwordInput = document.getElementById(id);
+      var eyeIcon = document.getElementById(iconId);
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        eyeIcon.classList.remove("fa-eye");
+        eyeIcon.classList.add("fa-eye-slash");
+      } else {
+        passwordInput.type = "password";
+        eyeIcon.classList.remove("fa-eye-slash");
+        eyeIcon.classList.add("fa-eye");
+      }
+    }
+  </script>
 <body style="background-color:rgb(255, 255, 255);">
   <div class="container p-2">
   <section class="vh-100">
@@ -45,7 +60,12 @@
 
                           <div data-mdb-input-init class="form-outline mb-4">
                           <label class="form-label" for="typePasswordX-2">Password</label>
-                              <input type="password" id="typePasswordX-2" name="password" class="form-control form-control-lg" required/>
+                          <div class="input-group">
+                              <input type="password" id="password" name="password" class="form-control form-control-lg" required/>
+                              <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password', 'togglePassword1')">
+                                  <i id="togglePassword1" class="fa fa-eye"></i>
+                              </button>
+                           </div>
                           </div>
                           <input type="hidden" name="action" value="adminlogin">
                           <!-- Checkbox -->

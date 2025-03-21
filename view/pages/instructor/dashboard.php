@@ -1,5 +1,6 @@
 <?php 
     include_once('../../../controller/ClassroomController.php');
+    include_once('../../../controller/InstructorController.php');
     $successMessage = isset($_GET['success']) ? $_GET['success'] : '';
     $instructorId = $_SESSION['instructor_id'] ?? null;
     
@@ -59,11 +60,31 @@
     </style>
 </head>
 <body>
-
+<script>
+    function togglePassword(inputId, iconId) {
+        var passwordInput = document.getElementById(inputId);
+        var eyeIcon = document.getElementById(iconId);
+        
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            eyeIcon.classList.remove("fa-eye");
+            eyeIcon.classList.add("fa-eye-slash");
+        } else {
+            passwordInput.type = "password";
+            eyeIcon.classList.remove("fa-eye-slash");
+            eyeIcon.classList.add("fa-eye");
+        }
+    }
+</script>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid d-flex justify-content-between align-items-center">
             <a class="navbar-brand" href="#">Instructor Dashboard</a>
-            <a href="logout.php" class="btn btn-danger">Logout</a>
+            <div>
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                    Change Password
+                </button>
+                <a href="logout.php" class="btn btn-danger">Logout</a>
+            </div>
         </div>
     </nav>
 
@@ -220,6 +241,77 @@
 
     </div>
 
+        <!-- Enrollment Modal -->
+        <div class="modal fade" id="enrollmentModal" tabindex="-1" aria-labelledby="enrollmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="enrollmentModalLabel">Enrollment Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="" method="post">
+                        <input type="hidden" name="action" value="changePassword">
+
+                        <!-- Old Password -->
+                        <div class="mb-3">
+                            <label for="oldpassword" class="form-label">Old Password</label>
+                            <div class="input-group">
+                                <input type="password" id="oldpassword" name="old_password" class="form-control form-control-lg" required/>
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('oldpassword', 'togglePassword1')">
+                                    <i id="togglePassword1" class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <div class="input-group">
+                                <input type="password" id="new_password" name="new_password" class="form-control form-control-lg" required/>
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('new_password', 'togglePassword2')">
+                                    <i id="togglePassword2" class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-control form-control-lg" required/>
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('confirm_password', 'togglePassword3')">
+                                    <i id="togglePassword3" class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="errorMessage" class="text-danger"></div>
+                        <button type="submit" class="btn btn-success">Update Password</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS & FontAwesome -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -286,7 +378,16 @@
                 });
 
 
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorMessage = urlParams.get('error');
 
+            if (errorMessage) {
+                document.getElementById("modalMessage").textContent = errorMessage;
+                let enrollmentModal = new bootstrap.Modal(document.getElementById("enrollmentModal"));
+                enrollmentModal.show();
+            }
+        });
 
 
         // Confirmation before submitting changes

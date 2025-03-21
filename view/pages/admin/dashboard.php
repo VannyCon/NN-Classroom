@@ -12,8 +12,9 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
+        <div class="container-fluid d-flex justify-content-between align-items-center">
             <a class="navbar-brand" href="#">Admin Dashboard</a>
+            <a href="logout.php" class="btn btn-danger">Logout</a>
         </div>
     </nav>
 

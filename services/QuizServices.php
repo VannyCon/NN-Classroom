@@ -17,6 +17,7 @@ class QuizServices extends config {
                     ON q.quiz_id = s.quiz_id_fk 
                     AND s.student_id_fk = :studentId
                 WHERE q.classroom_id_fk = :classroomId
+                ORDER BY `created_date` DESC
             ";
             
             $stmt = $this->pdo->prepare($query);
@@ -52,6 +53,40 @@ class QuizServices extends config {
         }
     }
     
+
+    public function getQuizScore($quiz_id) {
+        try {
+            $query = "SELECT 
+                             s.id AS score_id, 
+                            s.score_id, 
+                            s.classroom_id_fk, 
+                            c.classroom_title, 
+                            c.classroom_description, 
+                            s.quiz_id_fk, 
+                            q.quiz_title, 
+                            q.quiz_description, 
+                            s.student_id_fk, 
+                            st.student_fullname, 
+                            s.score, 
+                            s.total, 
+                            c.instructor_id_fk, 
+                            i.instructor_fullname
+                        FROM tbl_score s
+                        JOIN tbl_quiz q ON s.quiz_id_fk = q.quiz_id
+                        JOIN tbl_student st ON s.student_id_fk = st.student_id
+                        JOIN tbl_classroom c ON s.classroom_id_fk = c.classroom_id
+                        JOIN tbl_instructor i ON c.instructor_id_fk = i.instructor_id
+                        WHERE s.quiz_id_fk=:quiz_id";
+                    
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':quiz_id', $quiz_id);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Database Error: " . $e->getMessage());
+            return false;
+        }
+    }
     
 
     public function createQuiz($quizId, $quizTitle, $quizDescription, $instructorId, $classroomId, $expiration) {

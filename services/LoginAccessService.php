@@ -11,11 +11,11 @@ class LoginAccess extends config {
             $stmt = $this->pdo->prepare($query);
             $stmt->bindParam(':username', $username);
             $stmt->execute();
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-            if ($user && $password === $user['admin_password']) {
+            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($admin && $password === $admin['admin_password']) {
                 // Password is correct, start a session
-                $_SESSION['user_id'] =  $user['id'];
-                $_SESSION['username'] = $user['admin_username'];
+                $_SESSION['admin_id'] =  $admin['id'];
+                $_SESSION['admin_username'] = $admin['admin_username'];
                 // Redirect to a protected page
                 return true;
                 exit();
@@ -88,6 +88,8 @@ class LoginAccess extends config {
             return false;
         }
     }
+    
+
 
 }
 ?>

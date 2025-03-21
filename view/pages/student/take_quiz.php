@@ -81,13 +81,16 @@ $questions = $questionServices->fetchQuestions($quizID, $classroomID);
                     <div class="card p-3 mb-3">
 
                         <p><strong><?php echo $index + 1; ?>. </strong><?php echo htmlspecialchars($q['question_description']); ?></p>
-                        <div class="image-upload mb-2">
-                            <div class="d-flex justify-content-center">
-                                <img src="<?php echo $q['image_path']; ?>" class="img-fluid img-thumbnail responsive-image" alt="..."
-                                    data-bs-toggle="modal" data-bs-target="#imageModal" 
-                                    onclick="document.getElementById('modalImage').src='<?php echo $q['image_path']; ?>'">
+                        <?php
+                         if($q['image_path'] != ''){?>
+                            <div class="image-upload mb-2">
+                                    <div class="d-flex justify-content-center">
+                                        <img src="<?php echo $q['image_path']; ?>" class="img-fluid img-thumbnail responsive-image" alt="..."
+                                            data-bs-toggle="modal" data-bs-target="#imageModal" 
+                                            onclick="document.getElementById('modalImage').src='<?php echo $q['image_path']; ?>'">
+                                    </div>
                             </div>
-                        </div>
+                        <?php }?>
                         <?php if ($q['question_type'] == 'isMultipleChoice') { ?>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="answers[<?php echo $q['question_id']; ?>]" value="<?php echo $q['a']; ?>" required>

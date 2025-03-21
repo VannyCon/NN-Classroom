@@ -62,7 +62,22 @@ class AdminServices extends config {
         }
     }
 
- 
+    public function adminLogout() {
+    
+        // Unset only admin-related session variables
+        unset($_SESSION['admin_id']);
+        unset($_SESSION['admin_username']);
+    
+        // Check if all admin-related session variables are removed
+        if (!isset($_SESSION['admin_id']) && 
+            !isset($_SESSION['admin_username'])) {
+            
+            // Destroy session only if no admin data remains
+            session_write_close(); // Ensures session is saved before redirecting
+            header("Location: index.php"); // Redirect to index.php
+            exit();
+        }
+    }
     
   
 }
