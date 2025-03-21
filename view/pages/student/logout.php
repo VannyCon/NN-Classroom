@@ -1,5 +1,5 @@
 <?php
-include_once('../../../controller/StudentController.php'); 
+    include_once('../../../middleware/StudentMiddleware.php');
 
 $studentService->studentLogout();
 

@@ -1,8 +1,5 @@
 <?php 
-
-require_once("../../../connection/config.php");
-require_once("../../../connection/connection.php");
-
+require_once("../../../middleware/Middleware.php");
 class LoginAccess extends config {
     public function adminlogin($username, $password){
         try {

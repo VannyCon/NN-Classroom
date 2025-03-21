@@ -1,6 +1,5 @@
 <?php
-require_once("../../../connection/config.php");
-require_once("../../../connection/connection.php");
+require_once("../../../middleware/Middleware.php");
 
 class QuizServices extends config {
     public function getQuizzes($classroomId, $studentId) {

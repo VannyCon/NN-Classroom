@@ -1,10 +1,9 @@
 <?php 
     // Get parameters from the URL
+    include_once('../../../middleware/InstructorMiddleware.php');
     $classroomId = $_GET['classroom_id'] ?? null; 
     $instructorID = $_GET['instructor_id'] ?? null; 
     $quizID = $_GET['quiz_id'] ?? null; 
-    include_once('../../../controller/QuestionController.php');
-
     // Redirect if any required parameter is missing
     if (!$classroomId || !$instructorID || !$quizID) {
         header("Location: ../../../404.php");

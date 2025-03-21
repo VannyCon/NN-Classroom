@@ -1,5 +1,5 @@
 <?php 
-    include_once('../../../controller/QuizController.php');
+    include_once('../../../middleware/StudentMiddleware.php');
     $successMessage = $_GET['success'] ?? '';
     $classroomId = $_GET['classroom_id'] ?? null; 
     $studentID = $_GET['student_id'] ?? null; 

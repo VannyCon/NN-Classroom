@@ -1,5 +1,5 @@
 <?php
-include_once('../../../controller/AdminController.php'); 
+include_once('../../../middleware/AdminMiddleware.php');
 
 $admin->adminLogout();
 

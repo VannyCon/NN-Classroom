@@ -1,5 +1,5 @@
 <?php
-    include_once('../../../controller/StudentController.php');
+    include_once('../../../middleware/StudentMiddleware.php');
     $successMessage = isset($_GET['success']) ? $_GET['success'] : '';
     $studentId = $_SESSION['student_id'] ?? null;
     $classroomList = $studentService->showStudentClassroom($studentId);

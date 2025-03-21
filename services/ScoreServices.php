@@ -1,6 +1,5 @@
 <?php
-require_once("../../../connection/config.php");
-require_once("../../../connection/connection.php");
+require_once("../../../middleware/Middleware.php");
 
 class ScoreServices extends config {
     public function saveScore($score_id, $studentID, $quizID, $classroomID, $score, $total) {

@@ -1,5 +1,5 @@
 <?php
-include_once('../../../controller/InstructorController.php'); 
+include_once('../../../middleware/InstructorMiddleware.php');
 
 $instructor->instructorLogout();
 

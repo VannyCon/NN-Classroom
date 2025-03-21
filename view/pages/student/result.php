@@ -1,5 +1,5 @@
 <?php
-require_once('../../../controller/QuestionController.php');
+include_once('../../../middleware/StudentMiddleware.php');
 
 // Get values from URL
 $score = $_GET['score'] ?? null;

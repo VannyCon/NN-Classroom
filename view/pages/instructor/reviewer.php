@@ -1,5 +1,5 @@
 <?php 
-    include_once('../../../controller/ClassroomController.php');
+    include_once('../../../middleware/InstructorMiddleware.php');
 
     // Display error messages if any
     if (isset($_GET['error'])) {

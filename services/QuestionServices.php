@@ -1,7 +1,5 @@
 <?php
-require_once("../../../connection/config.php");
-require_once("../../../connection/connection.php");
-
+require_once("../../../middleware/Middleware.php");
 class QuestionServices extends config {
     
     public function saveQuestions($questions) {

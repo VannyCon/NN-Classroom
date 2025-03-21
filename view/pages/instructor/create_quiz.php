@@ -1,5 +1,5 @@
 <?php 
-    include_once('../../../controller/QuestionController.php');
+    include_once('../../../middleware/InstructorMiddleware.php');
 
     // Get parameters from the URL
     $classroomId = $_GET['classroom_id'] ?? null; 

@@ -1,14 +1,6 @@
 <?php 
-    // Set expiration date and time (YYYY-MM-DD HH:MM:SS format)
-    $expireDateTime = strtotime("2025-04-13 12:00:00"); // Change to your desired date & time
-    $currentDateTime = time();
 
-    // If the time has passed, prevent file inclusion
-    if ($currentDateTime >= $expireDateTime) {
-        die("Access to this service is no longer available. Please contact the administrator.");
-    }
-
-    include_once('../../../controller/LoginController.php');
+include_once('../../../middleware/InstructorMiddleware.php');
 ?>
 
 <!DOCTYPE html>

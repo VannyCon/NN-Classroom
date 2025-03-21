@@ -1,6 +1,5 @@
 <?php 
-    include_once('../../../controller/ClassroomController.php');
-    include_once('../../../controller/InstructorController.php');
+    include_once('../../../middleware/InstructorMiddleware.php');
     $successMessage = isset($_GET['success']) ? $_GET['success'] : '';
     $instructorId = $_SESSION['instructor_id'] ?? null;
     

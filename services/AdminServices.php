@@ -1,7 +1,5 @@
 <?php
-require_once("../../../connection/config.php");
-require_once("../../../connection/connection.php");
-
+require_once("../../../middleware/Middleware.php");
 class AdminServices extends config {
     public function getAllInstructor() {
         try {

@@ -1,6 +1,7 @@
 <?php
 include_once('../../../controller/InstructorController.php');
 
+
 // Check if token is valid
 if (!isset($_GET['token']) || !isset($_SESSION['reset_token']) || $_GET['token'] !== $_SESSION['reset_token']) {
     header("Location: forgot_password.php");

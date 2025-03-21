@@ -1,10 +1,9 @@
 <?php
+include_once('../../../middleware/StudentMiddleware.php');
 // Handle the request
 $quizID = $_GET['quiz_id'] ?? null;
 $classroomID = $_GET['classroom_id'] ?? null;
 $studentID = $_GET['student_id'] ?? null;
-
-require_once('../../../controller/QuestionController.php');
 $questions = $questionServices->fetchQuestions($quizID, $classroomID);
 ?>
 

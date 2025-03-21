@@ -1,5 +1,5 @@
 <?php 
-include_once('../../../controller/QuizController.php');
+    include_once('../../../middleware/InstructorMiddleware.php');
 
 if (isset($_GET['quiz_id'])) {
     $quiz_id = $_GET['quiz_id'];

@@ -1,5 +1,5 @@
 <?php
-require_once('../../../controller/QuestionController.php');
+    include_once('../../../middleware/InstructorMiddleware.php');
 
 $classroomID = $_GET['classroom_id'] ?? null;
 

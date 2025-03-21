@@ -1,11 +1,10 @@
 <?php 
-    include_once('../../../controller/QuizController.php');
-    include_once('../../../controller/ClassroomController.php');
+    include_once('../../../middleware/StudentMiddleware.php');
     if (isset($_GET['classroom_id'])) {
         $classroom_id = $_GET['classroom_id'];
     }
     if (!$classroom_id) {
-        header("Location: classroom.php?error=Instructor not logged in or Classroom doesn't exist.");
+        header("Location: classroom.php?error=Student not logged in or Classroom doesn't exist.");
         exit();
     }
     $studentID = $_SESSION['student_id'];

@@ -1,12 +1,5 @@
 <?php 
-  $expireDateTime = strtotime("2025-04-13 12:00:00"); // Change to your desired date & time
-  $currentDateTime = time();
-  if ($currentDateTime >= $expireDateTime) {
-      die("Access to this service is no longer available. Please contact the administrator.");
-  }
-
-    include_once('../../../controller/LoginController.php');
-
+  include_once('../../../middleware/AdminMiddleware.php');
 ?>
 <!DOCTYPE html>
 <html lang="en">
